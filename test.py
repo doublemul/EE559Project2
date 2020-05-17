@@ -13,12 +13,16 @@ from modules import *
 
 
 def create_model():
-    return Sequential  # TODO: define model
+    return Sequential((Linear(2, 25),
+                       Tanh(),
+                       Linear(25, 25),
+                       ReLU(),
+                       Linear(25, 2)))
 
 
 def generate_disc_set(nb):
     input = torch.Tensor(nb, 2).uniform_(0, 1)
-    target = torch.LongTensor([1 if i.pow(2).sum().item() < 1.0 / (2.0 * math.pi) else 0 for i in input])
+    target = torch.LongTensor([[1] if i.pow(2).sum().item() < 1.0 / (2.0 * math.pi) else [0] for i in input])
     return input, target
 
 
@@ -29,12 +33,22 @@ def train_model(args, model, train_input, train_target, logs):
 
         for batch_input, batch_target in zip(train_input.split(args.batch_size),
                                              train_target.split(args.batch_size)):
-            output = model(batch_input)
-            # TODO: SGD
+            pred = model.forward(batch_input)
+            one_hot = torch.zeros(batch_input.size(0), 2).scatter_(1, batch_target, 1)
+            loss = criterion.forward(pred, one_hot)
+            model.backward(criterion.backward())
+            param = model.param()
+            grad = model.gard()
+            update_param = []
+            for p, g in zip(param, grad):
+                update_param.append(p - args.lr * g)
+            model.update(update_param)
 
         # record loss
-        train_loss = criterion(output, batch_target).item()
-        logs.write('epoch %d: loss = %.6f.\n' % (epoch, train_loss))
+        pred = model.forward(train_input)
+        train_loss = criterion.forward(pred, train_target).item()
+        print('epoch %d: loss = %.6f.' % (epoch, train_loss))
+        # logs.write('epoch %d: loss = %.6f.\n' % (epoch, train_loss))
 
 
 def compute_nb_errors(args, model, test_input, test_target):
@@ -42,7 +56,7 @@ def compute_nb_errors(args, model, test_input, test_target):
 
     for batch_input, batch_target in zip(test_input.split(args.batch_size),
                                          test_target.split(args.batch_size)):
-        output = model(batch_input)
+        output = model.forward(batch_input)
         _, predicted_classes = torch.max(output, 1)
         for k in range(len(predicted_classes)):
             if batch_target[k] != predicted_classes[k]:
@@ -52,11 +66,12 @@ def compute_nb_errors(args, model, test_input, test_target):
 
 
 if __name__ == '__main__':
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--sample_num', default=1000, type=int)  # train and test set sample number
     parser.add_argument('--batch_size', default=100, type=int)  # train mini-batch size
-    parser.add_argument('--epoch_num', default=10, type=int)  # train epoch number
-    parser.add_argument('--lr', default=0.01, type=float)  # learning rate
+    parser.add_argument('--epoch_num', default=100, type=int)  # train epoch number
+    parser.add_argument('--lr', default=1e-4, type=float)  # learning rate
     parser.add_argument('--rounds_num', default=5, type=int)  # round number
     args = parser.parse_args()
 
@@ -75,21 +90,28 @@ if __name__ == '__main__':
     train_input.sub_(mean).div_(std)
     test_input.sub_(mean).div_(std)
 
-    # Train model #
-    nbs_errors = []
-    for r in range(1, args.rounds_num + 1):
-        logs.write('Round %d:\n' % r)
-        model = create_model()
-        train_model(args, model, train_input, train_target, logs)
-        nb_errors = compute_nb_errors(args, model, test_input, test_target)
-        nbs_errors.append(nb_errors)
-        del model
 
-    # Record results #
-    error_rates = np.array(nbs_errors) / args.sample_num
-    info = 'Average test error rate: %.2f%%, standard deviation: %.4e.' \
-           % (100 * (error_rates.mean()), error_rates.std())
-    print(info)
-    logs.write('%s\n\n' % info)
+    model = create_model()
+    train_model(args, model, train_input, train_target, logs)
+    nb_errors = compute_nb_errors(args, model, test_input, test_target)
+    print('test error rate: %.2f%%' % (100 * nb_errors / args.sample_num))
+
+    # # Train model #
+    # nbs_errors = []
+    # for r in range(1, args.rounds_num + 1):
+    #     logs.write('Round %d:\n' % r)
+    #     model = create_model()
+    #     train_model(args, model, train_input, train_target, logs)
+    #     nb_errors = compute_nb_errors(args, model, test_input, test_target)
+    #     nbs_errors.append(nb_errors)
+    #     del model
+    #
+    # # Record results #
+    # print(nbs_errors)
+    # error_rates = np.array(nbs_errors) / args.sample_num
+    # info = 'Average test error rate: %.2f%%, standard deviation: %.4e.' \
+    #        % (100 * (error_rates.mean()), error_rates.std())
+    # print(info)
+    # logs.write('%s\n\n' % info)
 
     print('Done.')

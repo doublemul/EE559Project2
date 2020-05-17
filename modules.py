@@ -4,35 +4,50 @@
 # @Author       : Xiaoyu LIN
 # @File         : modules.py
 # @Description  :
-
+import torch
+import math
 
 class Linear(object):
     """
     Fully connected layer
     """
 
-    def forward(self, *input):
+    def __init__(self, in_dim, out_dim):
+        self.parameters = [torch.empty(out_dim, in_dim), torch.empty(out_dim)]
+        self.parameters[0].normal_(0, math.sqrt(2/in_dim))
+        self.parameters[1].zero_()
+
+    def forward(self, input):
         """
 
         :param input:
         :return:
         """
-        raise NotImplementedError
+        self.input = input
+        output = input.matmul(self.parameters[0].t()) + self.parameters[1]
+        return output
 
-    def backward(self, *gradwrtoutput):
+    def backward(self, gradwrtoutput):
         """
 
         :param gradwrtoutput:
         :return:
         """
-        raise NotImplementedError
+        self.gradwrtoutput = gradwrtoutput
+        return gradwrtoutput.matmul(self.parameters[0])
+
+    def grad(self):
+
+        grad_wrt_weights = self.gradwrtoutput.t().matmul(self.input)
+        grad_wrt_biases = self.gradwrtoutput.sum(0)
+        return [grad_wrt_weights, grad_wrt_biases]
 
     def param(self):
         """
 
         :return:
         """
-        return []
+        return self.parameters
 
 
 class Tanh(object):
@@ -40,14 +55,15 @@ class Tanh(object):
     Tanh function
     """
 
-    def forward(self, *input):
-        raise NotImplementedError
+    def forward(self, input):
+        self.input = input
+        return input.tanh_()
 
-    def backward(self, *gradwrtoutput):
-        raise NotImplementedError
+    def backward(self, gradwrtoutput):
+        return gradwrtoutput * (1 - (self.input.tanh()) * (self.input.tanh()))
 
     def param(self):
-        return []
+        return None
 
 
 class ReLU(object):
@@ -55,26 +71,58 @@ class ReLU(object):
     ReLu function
     """
 
-    def forward(self, *input):
-        raise NotImplementedError
+    def forward(self, input):
+        self.input = input
+        return input.relu()
 
-    def backward(self, *gradwrtoutput):
-        raise NotImplementedError
+    def backward(self, gradwrtoutput):
+        grad = torch.where(self.input > 0, torch.ones_like(self.input), torch.zeros_like(self.input))
+        return gradwrtoutput * grad
 
     def param(self):
-        return []
+        return None
 
 
 class Sequential(object):
 
-    def forward(self, *input):
-        raise NotImplementedError
+    def __init__(self, *layers):
 
-    def backward(self, *gradwrtoutput):
-        raise NotImplementedError
+        self.model = []
+        for layer in layers:
+            self.model.extend(layer)
+
+    def forward(self, input):
+        output = input
+        for layer in self.model:
+            output = layer.forward(output)
+        return output
+
+    def backward(self, gradwrtoutput):
+        output = gradwrtoutput
+        for layer in reversed(self.model):
+            output = layer.backward(output)
 
     def param(self):
-        return []
+        output = []
+        for layer in self.model:
+            if layer.param() is not None:
+                output.extend(layer.param())
+        return output
+
+    def gard(self):
+        output = []
+        for layer in self.model:
+            if layer.param() is not None:
+                output.extend(layer.grad())
+        return output
+
+    def update(self, parameters):
+        i = 0
+        for layer in self.model:
+            if layer.param() is not None:
+                for t in range(len(layer.param())):
+                    layer.parameters[t] = parameters[i]
+                    i += 1
 
 
 class LossMSE(object):
@@ -82,11 +130,13 @@ class LossMSE(object):
     compute the MSE loss.
     """
 
-    def forward(self, *input):
-        raise NotImplementedError
+    def forward(self, pred, label):
+        self.pred = pred
+        self.label = label
+        return (pred - label).pow(2).mean(0).sum()
 
-    def backward(self, *gradwrtoutput):
-        raise NotImplementedError
+    def backward(self):
+        return 2 * (self.pred - self.label) / self.pred.size(0)
 
-    def param(self):
-        return []
+
+
