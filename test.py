@@ -69,9 +69,9 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--sample_num', default=1000, type=int)  # train and test set sample number
-    parser.add_argument('--batch_size', default=10, type=int)  # train mini-batch size
-    parser.add_argument('--epoch_num', default=10, type=int)  # train epoch number
-    parser.add_argument('--lr', default=1e-3, type=float)  # learning rate
+    parser.add_argument('--batch_size', default=100, type=int)  # train mini-batch size
+    parser.add_argument('--epoch_num', default=100, type=int)  # train epoch number
+    parser.add_argument('--lr', default=1e-2, type=float)  # learning rate
     parser.add_argument('--rounds_num', default=5, type=int)  # round number
     args = parser.parse_args()
 
