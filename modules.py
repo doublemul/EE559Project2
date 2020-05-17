@@ -57,7 +57,7 @@ class Tanh(object):
 
     def forward(self, input):
         self.input = input
-        return input.tanh_()
+        return input.tanh()
 
     def backward(self, gradwrtoutput):
         return gradwrtoutput * (1 - (self.input.tanh()) * (self.input.tanh()))

@@ -14,15 +14,15 @@ from modules import *
 
 def create_model():
     return Sequential((Linear(2, 25),
-                       Tanh(),
-                       Linear(25, 25),
                        ReLU(),
+                       Linear(25, 25),
+                       Tanh(),
                        Linear(25, 2)))
 
 
 def generate_disc_set(nb):
     input = torch.Tensor(nb, 2).uniform_(0, 1)
-    target = torch.LongTensor([[1] if i.pow(2).sum().item() < 1.0 / (2.0 * math.pi) else [0] for i in input])
+    target = torch.LongTensor([[1] if (i-0.5).pow(2).sum().item() < 1.0 / (2.0 * math.pi) else [0] for i in input])
     return input, target
 
 
@@ -69,9 +69,9 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--sample_num', default=1000, type=int)  # train and test set sample number
-    parser.add_argument('--batch_size', default=100, type=int)  # train mini-batch size
-    parser.add_argument('--epoch_num', default=100, type=int)  # train epoch number
-    parser.add_argument('--lr', default=1e-4, type=float)  # learning rate
+    parser.add_argument('--batch_size', default=10, type=int)  # train mini-batch size
+    parser.add_argument('--epoch_num', default=10, type=int)  # train epoch number
+    parser.add_argument('--lr', default=1e-3, type=float)  # learning rate
     parser.add_argument('--rounds_num', default=5, type=int)  # round number
     args = parser.parse_args()
 
