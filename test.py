@@ -13,11 +13,11 @@ from modules import *
 
 
 def create_model():
-    return Sequential((Linear(2, 25, 1e-6),
+    return Sequential((Linear(2, 25),
                        Tanh(),
-                       Linear(25, 25, 1e-6),
+                       Linear(25, 25),
                        ReLU(),
-                       Linear(25, 2, 1e-6)))
+                       Linear(25, 2)))
 
 
 def generate_disc_set(nb):

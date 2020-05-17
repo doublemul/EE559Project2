@@ -5,17 +5,17 @@
 # @File         : modules.py
 # @Description  :
 import torch
-
+import math
 
 class Linear(object):
     """
     Fully connected layer
     """
 
-    def __init__(self, in_dim, out_dim, epsilon):
+    def __init__(self, in_dim, out_dim):
         self.parameters = [torch.empty(out_dim, in_dim), torch.empty(out_dim)]
-        self.parameters[0].normal_(0, epsilon)
-        self.parameters[1].normal_(0, epsilon)
+        self.parameters[0].normal_(0, math.sqrt(2/in_dim))
+        self.parameters[1].zero_()
 
     def forward(self, input):
         """
@@ -24,8 +24,7 @@ class Linear(object):
         :return:
         """
         self.input = input
-        output = input.matmul(self.parameters[0].t())
-        output += self.parameters[1]
+        output = input.matmul(self.parameters[0].t()) + self.parameters[1]
         return output
 
     def backward(self, gradwrtoutput):
@@ -35,13 +34,13 @@ class Linear(object):
         :return:
         """
         self.gradwrtoutput = gradwrtoutput
-        return self.parameters[0].t().mv(gradwrtoutput)
+        return gradwrtoutput.matmul(self.parameters[0])
 
     def grad(self):
 
-        grad_wrt_weight = self.gradwrtoutput.view(-1, 1).mm(self.input.mean(0).view(1, -1))
-        grad_wrt_bias = self.gradwrtoutput
-        return [grad_wrt_weight, grad_wrt_bias]
+        grad_wrt_weights = self.gradwrtoutput.t().matmul(self.input)
+        grad_wrt_biases = self.gradwrtoutput.sum(0)
+        return [grad_wrt_weights, grad_wrt_biases]
 
     def param(self):
         """
@@ -58,11 +57,10 @@ class Tanh(object):
 
     def forward(self, input):
         self.input = input
-        return input.tanh()
+        return input.tanh_()
 
     def backward(self, gradwrtoutput):
-        grad = 4 * (self.input.exp() + self.input.mul(-1).exp()).pow(-2).mean(0)
-        return grad * gradwrtoutput
+        return gradwrtoutput * (1 - (self.input.tanh()) * (self.input.tanh()))
 
     def param(self):
         return None
@@ -78,8 +76,8 @@ class ReLU(object):
         return input.relu()
 
     def backward(self, gradwrtoutput):
-        grad = torch.where(self.input > 0, torch.ones_like(self.input), torch.zeros_like(self.input)).mean(0)
-        return grad * gradwrtoutput
+        grad = torch.where(self.input > 0, torch.ones_like(self.input), torch.zeros_like(self.input))
+        return gradwrtoutput * grad
 
     def param(self):
         return None
@@ -138,9 +136,7 @@ class LossMSE(object):
         return (pred - label).pow(2).mean(0).sum()
 
     def backward(self):
-        return 2 * (self.pred - self.label).mean(0)
+        return 2 * (self.pred - self.label) / self.pred.size(0)
 
-    def param(self):
-        return None
 
 
