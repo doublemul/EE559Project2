@@ -16,8 +16,11 @@ def create_model():
     return Sequential((Linear(2, 25),
                        ReLU(),
                        Linear(25, 25),
-                       Tanh(),
-                       Linear(25, 2)))
+                       ReLU(),
+                       Linear(25, 25),
+                       ReLU(),
+                       Linear(25, 2),
+                       Tanh()))
 
 
 def generate_disc_set(nb):
@@ -34,8 +37,10 @@ def train_model(args, model, train_input, train_target, logs):
         for batch_input, batch_target in zip(train_input.split(args.batch_size),
                                              train_target.split(args.batch_size)):
             pred = model.forward(batch_input)
-            one_hot = torch.zeros(batch_input.size(0), 2).scatter_(1, batch_target, 1)
-            loss = criterion.forward(pred, one_hot)
+            labels = torch.ones(batch_input.size(0), 2) * -1
+            labels.scatter_(1, batch_target, 1)
+            # print(labels)
+            criterion.forward(pred, labels)
             model.backward(criterion.backward())
             param = model.param()
             grad = model.gard()
@@ -45,9 +50,11 @@ def train_model(args, model, train_input, train_target, logs):
             model.update(update_param)
 
         # record loss
+        labels = torch.ones(train_input.size(0), 2) * -1
+        labels.scatter_(1, train_target, 1)
         pred = model.forward(train_input)
-        train_loss = criterion.forward(pred, train_target).item()
-        print('epoch %d: loss = %.6f.' % (epoch, train_loss))
+        loss = criterion.forward(pred, labels).item()
+        print('epoch %d: loss = %.6f.' % (epoch, loss))
         # logs.write('epoch %d: loss = %.6f.\n' % (epoch, train_loss))
 
 
@@ -69,10 +76,9 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--sample_num', default=1000, type=int)  # train and test set sample number
-    parser.add_argument('--batch_size', default=100, type=int)  # train mini-batch size
-    parser.add_argument('--epoch_num', default=100, type=int)  # train epoch number
-    parser.add_argument('--lr', default=1e-2, type=float)  # learning rate
-    parser.add_argument('--rounds_num', default=5, type=int)  # round number
+    parser.add_argument('--batch_size', default=10, type=int)  # train mini-batch size
+    parser.add_argument('--epoch_num', default=250, type=int)  # train epoch number
+    parser.add_argument('--lr', default=1e-3, type=float)  # learning rate
     args = parser.parse_args()
 
     # Prepare settings #

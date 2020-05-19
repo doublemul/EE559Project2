@@ -14,7 +14,7 @@ class Linear(object):
 
     def __init__(self, in_dim, out_dim):
         self.parameters = [torch.empty(out_dim, in_dim), torch.empty(out_dim)]
-        self.parameters[0].normal_(0, math.sqrt(2/in_dim))
+        self.parameters[0].normal_(0, math.sqrt(2/out_dim))
         self.parameters[1].zero_()
 
     def forward(self, input):
@@ -57,10 +57,10 @@ class Tanh(object):
 
     def forward(self, input):
         self.input = input
-        return input.tanh()
+        return torch.tanh(input)
 
     def backward(self, gradwrtoutput):
-        return gradwrtoutput * (1 - (self.input.tanh()) * (self.input.tanh()))
+        return gradwrtoutput * (1 - (self.input.tanh()) ** 2)
 
     def param(self):
         return None
@@ -76,7 +76,9 @@ class ReLU(object):
         return input.relu()
 
     def backward(self, gradwrtoutput):
-        grad = torch.where(self.input > 0, torch.ones_like(self.input), torch.zeros_like(self.input))
+        grad = self.input
+        grad[grad > 0.0] = 1.0
+        grad[grad <= 0.0] = 0.0
         return gradwrtoutput * grad
 
     def param(self):
@@ -133,10 +135,10 @@ class LossMSE(object):
     def forward(self, pred, label):
         self.pred = pred
         self.label = label
-        return (pred - label).pow(2).mean(0).sum()
+        return (pred - label).pow(2).sum(-1).mean()
 
     def backward(self):
-        return 2 * (self.pred - self.label) / self.pred.size(0)
+        return 2 * (self.pred - self.label).mean(0)
 
 
 
