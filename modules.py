@@ -3,7 +3,7 @@
 # @Project      : DeepLearningProject2
 # @Author       : Xiaoyu LIN
 # @File         : modules.py
-# @Description  :
+
 import torch
 import math
 

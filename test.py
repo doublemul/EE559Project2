@@ -3,7 +3,6 @@
 # @Project      : DeepLearningProject2
 # @Author       : Xiaoyu LIN
 # @File         : test.py
-# @Description  :
 
 import argparse
 import matplotlib.pyplot as plt
