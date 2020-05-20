@@ -177,8 +177,8 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', default=10, type=int)  # train mini-batch size
     parser.add_argument('--epoch_num', default=200, type=int)  # train epoch number
     parser.add_argument('--lr', default=1e-3, type=float)  # learning rate
-    parser.add_argument('--round_num', default=1, type=int)  # learning rate
-    parser.add_argument('--plot', default=True, type=str2bool)
+    parser.add_argument('--round_num', default=1, type=int)  # round number
+    parser.add_argument('--plot', default=True, type=str2bool)  # a boolean, if true, record and display loss
     args = parser.parse_args()
 
     # Prepare settings #
