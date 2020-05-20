@@ -1,2 +1,3 @@
-# DeepLearningProject2
-Deep Learning Course miniProject 2
+# Deep Learning miniProject 2
+
+EPFL | Deep Learning | EE559
