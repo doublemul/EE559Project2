@@ -217,4 +217,4 @@ class LossMSE(object):
         Backward path gives gradient w.r.t model output
         :return: gradient w.r.t (Nx2)
         """
-        return 2 * (self.pred - self.label)
+        return 2.0 * (self.pred - self.label)
