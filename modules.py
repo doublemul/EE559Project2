@@ -15,6 +15,7 @@ class Linear(object):
     def __init__(self, in_dim, out_dim):
         self.parameters = [torch.empty(out_dim, in_dim), torch.empty(out_dim)]
         self.parameters[0].normal_(0, math.sqrt(2/out_dim))
+        # self.parameters[1].normal_(0, math.sqrt(2/out_dim))
         self.parameters[1].zero_()
 
     def forward(self, input):
@@ -126,6 +127,9 @@ class Sequential(object):
                     layer.parameters[t] = parameters[i]
                     i += 1
 
+    def zero_grad(self):
+
+
 
 class LossMSE(object):
     """
@@ -139,6 +143,15 @@ class LossMSE(object):
 
     def backward(self):
         return 2 * (self.pred - self.label).mean(0)
+
+
+class SGD(object):
+
+    def __init__(self, parameter, lr):
+        self.parameter = parameter
+        self.lr = lr
+
+
 
 
 
