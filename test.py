@@ -25,7 +25,7 @@ def create_model():
 def generate_disc_set(nb):
     """
     Generates data set of nb points sampled uniformly in [0,1]^2, each with a label 0 if outside the disk of
-    radius 1/sqrt(2*pi) and 1 inside,
+    radius 1/sqrt(2*pi) and 1 inside.
     :param nb: number of samples
     :return: input, target
     """
