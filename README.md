@@ -16,7 +16,7 @@ Pytorch
 From the root of the project: `python test.py`
 
 ## Description of the files
-* module.py: The implementation of the modules
+* module.py: the implementation of the modules
   * Includes `Linear`, `Relu`, `Tanh`, `LossMSE` and `Sequential`.
 * test.py: the required basic Python script using our framework `module.py`.  <br>
   * Generates the dataset, initializes and trains the required model with three hidden layers of 25 units.
