@@ -47,7 +47,7 @@ def create_model():
 def generate_disc_set(nb):
     """
     Generates data set of nb points sampled uniformly in [0,1]^2, each with a label 0 if outside the disk of
-    radius 1/sqrt(2*pi) and 1 inside,
+    radius 1/sqrt(2*pi) and 1 inside.
     :param nb: number of samples
     :return: input, target
     """
@@ -177,8 +177,8 @@ if __name__ == '__main__':
     parser.add_argument('--batch_size', default=10, type=int)  # train mini-batch size
     parser.add_argument('--epoch_num', default=200, type=int)  # train epoch number
     parser.add_argument('--lr', default=1e-3, type=float)  # learning rate
-    parser.add_argument('--round_num', default=1, type=int)  # round number
-    parser.add_argument('--plot', default=True, type=str2bool)  # a boolean, if true, record and display loss
+    parser.add_argument('--round_num', default=20, type=int)  # round number
+    parser.add_argument('--plot', default=False, type=str2bool)  # a boolean, if true, record and display loss
     args = parser.parse_args()
 
     # Prepare settings #
@@ -214,6 +214,11 @@ if __name__ == '__main__':
     plot = args.plot
     for r in range(1, args.round_num + 1):
         print('Round %d:' % r)
+        train_input, train_target = generate_disc_set(args.sample_num)
+        test_input, test_target = generate_disc_set(args.sample_num)
+        mean, std = train_input.mean(), train_input.std()
+        train_input.sub_(mean).div_(std)
+        test_input.sub_(mean).div_(std)
         model = create_model()
         t = time.time()
         nb_errors = train_model(args, model, train_input, train_target, test_input, test_target, logs, plot)

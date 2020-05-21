@@ -177,6 +177,11 @@ if __name__ == '__main__':
     plot = args.plot
     for r in range(1, args.round_num + 1):
         print('Round %d:' % r)
+        train_input, train_target = generate_disc_set(args.sample_num)
+        test_input, test_target = generate_disc_set(args.sample_num)
+        mean, std = train_input.mean(), train_input.std()
+        train_input.sub_(mean).div_(std)
+        test_input.sub_(mean).div_(std)
         model = create_model()
         t = time.time()
         nb_errors = train_model(args, model, train_input, train_target, test_input, test_target, logs, plot)
