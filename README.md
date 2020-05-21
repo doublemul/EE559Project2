@@ -10,7 +10,7 @@ tensor operations and the standard math library, hence in particular **without u
 neural-network modules**.
 
 ## Requirements
-Pytorch, Numpy
+Pytorch
 
 ## Run
 From the root of the project: `python test.py`
