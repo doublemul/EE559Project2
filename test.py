@@ -34,10 +34,13 @@ def generate_disc_set(nb):
     return input, target
 
 
-def train_model(args, model, train_input, train_target, test_input, test_target, logs):
+def train_model(sample_num, batch_size, epoch_num, lr, model, train_input, train_target, test_input, test_target, logs):
     """
     Train the MLP model, log and display results
-    :param args: experiment setup parameter
+    :param sample_num: sampler number
+    :param batch_size: batch size
+    :param epoch_num: epoch number
+    :param lr: learning rate
     :param model: model need to be train
     :param train_input: train set input data 1000x2
     :param train_target: train set target data 1000
@@ -47,10 +50,10 @@ def train_model(args, model, train_input, train_target, test_input, test_target,
     """
     criterion = LossMSE()
 
-    for epoch in range(1, args.epoch_num + 1):
+    for epoch in range(1, epoch_num + 1):
 
-        for batch_input, batch_target in zip(train_input.split(args.batch_size),
-                                             train_target.split(args.batch_size)):
+        for batch_input, batch_target in zip(train_input.split(batch_size),
+                                             train_target.split(batch_size)):
             pred = model.forward(batch_input)
             labels = torch.ones(batch_input.size(0), 2) * -1
             labels.scatter_(1, batch_target.unsqueeze(1), 1)
@@ -62,7 +65,7 @@ def train_model(args, model, train_input, train_target, test_input, test_target,
             grad = model.gard()
             update_param = []
             for p, g in zip(param, grad):
-                update_param.append(p - args.lr * g)
+                update_param.append(p - lr * g)
             model.update(update_param)
 
         # record train loss
@@ -82,28 +85,28 @@ def train_model(args, model, train_input, train_target, test_input, test_target,
         logs.write('test loss = %.6f, ' % loss)
 
         # record train error rate
-        nb_train_errors = compute_nb_errors(args, model, train_input, train_target)
-        print('train error rate = %.2f%%, ' % (100.0 * nb_train_errors / args.sample_num), end=' ')
-        logs.write('train error rate = %.2f%%, ' % (100.0 * nb_train_errors / args.sample_num))
+        nb_train_errors = compute_nb_errors(batch_size, model, train_input, train_target)
+        print('train error rate = %.2f%%, ' % (100.0 * nb_train_errors / sample_num), end=' ')
+        logs.write('train error rate = %.2f%%, ' % (100.0 * nb_train_errors / sample_num))
 
         # record test error rate
-        nb_test_errors = compute_nb_errors(args, model, test_input, test_target)
-        print('test error rate = %.2f%%.\n' % (100.0 * nb_test_errors / args.sample_num), end='')
-        logs.write('test error rate = %.2f%%.\n' % (100.0 * nb_test_errors / args.sample_num))
+        nb_test_errors = compute_nb_errors(batch_size, model, test_input, test_target)
+        print('test error rate = %.2f%%.\n' % (100.0 * nb_test_errors / sample_num), end='')
+        logs.write('test error rate = %.2f%%.\n' % (100.0 * nb_test_errors / sample_num))
 
 
-def compute_nb_errors(args, model, test_input, test_target):
+def compute_nb_errors(batch_size, model, test_input, test_target):
     """
     compute the number of errors of given model on given dataset
-    :param args: experiment setup parameters
+    :param batch_size: test batch size
     :param model: a model
     :param test_input: input data of dataset
     :param test_target: target data of dataset
     :return: number of error
     """
     nb_data_errors = 0
-    for batch_input, batch_target in zip(test_input.split(args.batch_size),
-                                         test_target.split(args.batch_size)):
+    for batch_input, batch_target in zip(test_input.split(batch_size),
+                                         test_target.split(batch_size)):
         output = model.forward(batch_input)
         _, predicted_classes = torch.max(output, 1)
         for k in range(len(predicted_classes)):
@@ -112,21 +115,13 @@ def compute_nb_errors(args, model, test_input, test_target):
     return nb_data_errors
 
 
-class HyperParameter:
-    """
-    Summary of all HyperParameter since argparse is not allowed
-    """
-    def __init__(self):
-        self.sample_num = 1000
-        self.batch_size = 10
-        self.epoch_num = 200
-        self.lr = 1e-3
-
-
 if __name__ == '__main__':
 
     # Set Hyper Parameters #
-    args = HyperParameter()
+    sample_num = 1000
+    batch_size = 10
+    epoch_num = 200
+    lr = 1e-3
 
     # Prepare settings #
     # auto-grad globally off
@@ -136,8 +131,8 @@ if __name__ == '__main__':
 
     # Prepare data #
     # load data
-    train_input, train_target = generate_disc_set(args.sample_num)
-    test_input, test_target = generate_disc_set(args.sample_num)
+    train_input, train_target = generate_disc_set(sample_num)
+    test_input, test_target = generate_disc_set(sample_num)
     # normalize data
     mean, std = train_input.mean(), train_input.std()
     train_input.sub_(mean).div_(std)
@@ -145,7 +140,7 @@ if __name__ == '__main__':
 
     # Train model #
     model = create_model()
-    train_model(args, model, train_input, train_target, test_input, test_target, logs)
+    train_model(sample_num, batch_size, epoch_num, lr, model, train_input, train_target, test_input, test_target, logs)
 
     logs.close()
     print('Done.')
