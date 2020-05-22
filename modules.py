@@ -57,9 +57,9 @@ class Linear(object):
         Compute gradient w.r.t each parameter, since we use mini-batch SGD, take the mean value
         :return: gradient w.r.t each parameter
         """
-        grad_wrt_weights = self.gradwrtoutput.t().matmul(self.input) / self.input.size(0)
+        grad_wrt_weights = self.gradwrtoutput.t().matmul(self.input)
         if self.bias:
-            grad_wrt_biases = self.gradwrtoutput.mean(0)
+            grad_wrt_biases = self.gradwrtoutput.sum(0)
             return [grad_wrt_weights, grad_wrt_biases]
         else:
             return grad_wrt_weights
@@ -217,4 +217,4 @@ class LossMSE(object):
         Backward path gives gradient w.r.t model output
         :return: gradient w.r.t (Nx2)
         """
-        return 2.0 * (self.pred - self.label)
+        return 2.0 * (self.pred - self.label) / self.pred.size(0)
