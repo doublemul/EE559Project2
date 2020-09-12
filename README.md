@@ -1,6 +1,6 @@
 # Mini deep-learning framework
 
-**EPFL | [Deep Learning(EE559)](https://fleuret.org/ee559/) | mini-project 2**
+**EPFL | [Deep Learning (EE559)](https://fleuret.org/ee559/) (Spring 2020) | mini-project 2**
 
 - Team member: Pengkang GUO, Xiaoyu LIN, Zhenyu ZHU
 
