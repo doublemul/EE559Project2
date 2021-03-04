@@ -1,14 +1,17 @@
 # Mini deep-learning framework
 
-**EPFL | [Deep Learning (EE559)](https://fleuret.org/ee559/) (Spring 2020) | mini-project 2**
-
-- **Team member**: Pengkang Guo, Xiaoyu Lin
+**EPFL | [Deep Learning (EE559)](https://fleuret.org/ee559/) (Spring 2020) | Mini-project 2**
 
 ## About
+- This is our implementaion for the mini-project 2 in the Deep leaning course at EPFL.
+  - **Team member**: Pengkang Guo, Xiaoyu Lin
+- [[report](report.pdf)]
+
+## Project Discription
 The objective of this project is to design a mini "deep learning framework" using only pytorch's
 tensor operations and the standard math library, hence in particular **without using autograd or the
-neural-network modules**.  
-[[report](report.pdf)]
+neural-network modules**. 
+
 ## Requirements
 Pytorch
 
