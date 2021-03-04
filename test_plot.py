@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @Project      : DeepLearningProject2
 # @Author       : Xiaoyu LIN
-# @File         : test.py
+# @File         : test_plot.py
 
 import argparse
 import matplotlib.pyplot as plt
