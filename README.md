@@ -1,6 +1,9 @@
 # Mini deep-learning framework
 
-**EPFL | [Deep Learning (EE559)](https://fleuret.org/ee559/) (Spring 2020) | Mini-project 2**
+**EPFL | [Deep Learning (EE559)](https://fleuret.org/ee559/) (Spring 2020) | Mini-project 2**  
+
+![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)
+![Pytorch 1.13.1](https://img.shields.io/badge/pytorch-1.4.0-orange.svg)
 
 ## About
 - This is our implementaion for the mini-project 2 in the Deep leaning course at EPFL.
